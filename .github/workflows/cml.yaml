@@ -1,32 +1,33 @@
-name: wine-quality-model
+name: model-wine-quality
 on: [push]
 jobs:
   run:
-    runs-on: [ubuntu-latest]
-    container: docker://ubuntu:latest
+    runs-on: ubuntu-latest
+    
+    # optionally use a convenient Ubuntu LTS + DVC + CML image
+    # container: ghcr.io/iterative/cml:0-dvc2-base1
+    env:  # <-- Add this part
+      REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - uses: actions/checkout@v3
+      # may need to setup NodeJS & Python3 on e.g. self-hosted
+      # - uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '16'
+      # - uses: actions/setup-python@v4
+      #   with:
+      #     python-version: '3.x'
+      - uses: iterative/setup-cml@v1
       - uses: actions/setup-node@v1
         with:
-            node-version: '12'
-      - uses: actions/checkout@v2
-      - name: cml_run
-        env:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          node-version: '16'
+      - name: Train model
         run: |
-
           # Your ML workflow goes here
-          apt update && apt install -y python3 python3-pip python3-setuptools
-          npm i -g @dvcorg/cml
-          # npm install -g vega-cli vega-lite
-          pip3 install -r requirements.txt
-          python3 train.py
-          
+          pip install -r requirements.txt
+          python train.py
           echo "## Model metrics" > report.md
           cat metrics.txt >> report.md
-          
-          echo "## Data viz" >> report.md
-          cml-publish feature_importance.png --md >> report.md
-          cml-publish residuals.png --md >> report.md
-          
-          cml-send-comment report.md
+
+          cml comment create report.md
       

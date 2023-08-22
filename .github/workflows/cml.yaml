@@ -26,6 +26,6 @@ jobs:
           pip install -r requirements.txt
           python train.py
           echo "Model Metrics"
-          cat metrics.txt
+          cat metrics.txt >> report.md
           cml comment create report.md
       

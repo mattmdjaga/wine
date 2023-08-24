@@ -2,6 +2,7 @@ name: model-wine-quality
 on: [push]
 jobs:
   run:
+    permissions: write-all
     runs-on: ubuntu-latest
     
     # optionally use a convenient Ubuntu LTS + DVC + CML image
@@ -18,10 +19,16 @@ jobs:
       #   with:
       #     python-version: '3.x'
       - uses: iterative/setup-cml@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16'
       - name: Train model
         run: |
           # Your ML workflow goes here
           pip install -r requirements.txt
           python train.py
-          echo "Model Metrics"
-          cat metrics.txt
+          echo "## Model metrics" > report.md
+          cat metrics.txt >> report.md
+
+          cml comment create report.md
+      
